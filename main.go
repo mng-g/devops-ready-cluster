@@ -372,7 +372,7 @@ func installKafka(cmd *cobra.Command, args []string) {
 	logInfo(`kubectl port-forward --namespace kafka svc/kafka 9092:9092`)
 }
 
-// TODO: use helm to deploy a release and inform the used about the URL exposed via ingress
+// TODO: use helm to deploy a release and inform the user about the URL exposed via ingress
 func installDemoApp(cmd *cobra.Command, args []string) {
 	logInfo("Deploying ArgoCD demo app...")
 	if err := runCommand("kubectl", "apply", "-f", "argocd-demo-app.yaml"); err != nil {

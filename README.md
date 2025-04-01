@@ -1,19 +1,63 @@
-# devops-ready-cluster
+# DevOps Ready Cluster
 
-A simple tool written in Go to create and set up a gentle cluster, ready for a demo.
+## Overview
+DevOps Ready Cluster is a CLI tool written in Go that automates the setup of a Kubernetes cluster using Kind. It provides out-of-the-box support for installing essential DevOps tools such as Metrics Server, Ingress, MetalLB, Cert-Manager, ArgoCD, Prometheus, Loki, and CloudNativePG.
 
-### Dependencies:
-kind, helm
+This project is designed for DevOps engineers looking to quickly set up a Kubernetes cluster with production-grade configurations for testing, development, and learning purposes.
 
-### Usage:
-```bash
-go run main.go create-cluster --name k8s-playground
-go run main.go install-all
-go run main.go install-demo # deploy a simple nginx app using argocd
+## Features
+- **Cluster Management**: Create and delete Kubernetes clusters with Kind
+- **Metrics & Monitoring**: Install Metrics Server, Prometheus, and Grafana
+- **Networking**: Deploy Ingress Controller and MetalLB
+- **Security & Certificates**: Set up Cert-Manager for certificate management
+- **GitOps**: Install ArgoCD for continuous deployment
+- **Logging**: Deploy Grafana Loki for log aggregation
+- **Database**: Install CloudNativePG for PostgreSQL management
+- **Messaging**: Install Kafka for event streaming
 
-# To the the argocd initial password (user: admin):
-kubectl -n argocd get secret argocd-initial-admin-secret -o jsonpath="{.data.password}" | base64 -d
+## Prerequisites
+Before using DevOps Ready Cluster, ensure you have the following installed:
 
-# To remove the cluster:
-go run main.go delete-cluster --name k8s-playground
+- [Go](https://go.dev/dl/)
+- [Kind](https://kind.sigs.k8s.io/)
+- [kubectl](https://kubernetes.io/docs/tasks/tools/)
+- [Helm](https://helm.sh/docs/intro/install/)
+- [Docker](https://docs.docker.com/get-docker/)
+
+## Installation
+```sh
+git clone https://github.com/yourusername/devops-ready-cluster.git
+cd devops-ready-cluster
+go build -o devops-ready-cluster
+mv devops-ready-cluster /usr/local/bin/
 ```
+
+## Usage
+### Create a Kubernetes Cluster
+```sh
+devops-ready-cluster create --name my-cluster
+```
+
+### Delete a Kubernetes Cluster
+```sh
+devops-ready-cluster delete --name my-cluster
+```
+
+### Install DevOps Tools
+```sh
+devops-ready-cluster install metrics-server
+devops-ready-cluster install ingress
+devops-ready-cluster install metallb
+devops-ready-cluster install cert-manager
+devops-ready-cluster install argocd
+devops-ready-cluster install monitoring
+devops-ready-cluster install logging
+devops-ready-cluster install database
+devops-ready-cluster install kafka
+```
+
+## Roadmap
+- [ ] Add support for components installation via config file
+- [ ] Implement automated TLS setup with Cert-Manager and an internal CA
+- [ ] Support for multi-cluster setups
+- [ ] Extend Helm chart customizations
