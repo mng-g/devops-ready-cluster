@@ -110,6 +110,7 @@ func createCluster(cmd *cobra.Command, args []string) {
 		logError("Error creating cluster: " + err.Error())
 		os.Exit(1)
 	}
+	logInfo("Cluster " + name + " created successfully!")
 }
 
 func deleteCluster(cmd *cobra.Command, args []string) {
@@ -123,6 +124,7 @@ func deleteCluster(cmd *cobra.Command, args []string) {
 		logError("Error deleting cluster: " + err.Error())
 		os.Exit(1)
 	}
+	logInfo("Cluster " + name + " deleted successfully!")
 }
 
 func installMetricsServer(cmd *cobra.Command, args []string) {
@@ -156,6 +158,7 @@ func installMetricsServer(cmd *cobra.Command, args []string) {
 		logError("Error installing Metrics Server: " + err.Error())
 		os.Exit(1)
 	}
+	logInfo("Metrics Server installed successfully!")
 }
 
 func installIngress(cmd *cobra.Command, args []string) {
@@ -169,6 +172,7 @@ func installIngress(cmd *cobra.Command, args []string) {
 		logError("Ingress Controller is not ready: " + err.Error())
 		os.Exit(1)
 	}
+	logInfo("Ingress Controller installed successfully!")
 }
 
 func installMetalLB(cmd *cobra.Command, args []string) {
@@ -197,6 +201,7 @@ func installMetalLB(cmd *cobra.Command, args []string) {
 	if err := runCommand("kubectl", "apply", "-f", "metallb-config.yaml"); err != nil {
 		logError("Error applying MetalLB configuration" + err.Error())
 	}
+	logInfo("MetalLB installed successfully!")
 }
 
 // TODO: Create issuer for self-signed certificates and interal CA
@@ -257,6 +262,7 @@ func installArgoCD(cmd *cobra.Command, args []string) {
 	// TODO: add TLS certificates for ArgoCD created by cert-manager. Use internal CA for now.
 
 	// Inform user about domain and certificate settings
+	logInfo("ArgoCD installation completed successfully!")
 	logInfo("ArgoCD is accessible at: https://argocd.local")
 	logWarning("Ensure that 'argocd.local' resolves to the correct IP by:")
 	logWarning("1. Editing your /etc/hosts file")
@@ -347,7 +353,6 @@ func installDatabase(cmd *cobra.Command, args []string) {
 	logInfo(`kubectl cnpg status <CNPG_CLUSTER> -n <NAMESPACE>`)
 }
 
-// TODO: TEST IT!
 func installKafka(cmd *cobra.Command, args []string) {
 	logInfo("Installing Kafka...")
 
@@ -379,6 +384,7 @@ func installDemoApp(cmd *cobra.Command, args []string) {
 		logError("Error deploying demo app: " + err.Error())
 		os.Exit(1)
 	}
+	logInfo("Demo app deployed successfully!")
 }
 
 func installAll(cmd *cobra.Command, args []string) {
