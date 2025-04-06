@@ -356,25 +356,28 @@ func installDatabase(cmd *cobra.Command, args []string) {
 func installKafka(cmd *cobra.Command, args []string) {
 	logInfo("Installing Kafka...")
 
-	if err := runCommand("helm", "repo", "add", "bitnami", "https://charts.bitnami.com/bitnami"); err != nil {
-		logFatal("Error adding Bitnami Helm repo", err)
-	}
-
-	if err := runCommand("helm", "repo", "update"); err != nil {
-		logFatal("Error updating Helm repositories", err)
-	}
-
 	if err := runCommand(
-		"helm", "install", "kafka", "bitnami/kafka",
-		"--namespace", "kafka",
-		"--create-namespace",
+		"helm", "install", "strimzi-cluster-operator", "oci://quay.io/strimzi-helm/strimzi-kafka-operator",
+		"--create-namespace", "--namespace", "kafka",
+		"--set", "replicas=2",
 	); err != nil {
 		logFatal("Error installing Kafka", err)
 	}
 
+	if err := runCommand("kubectl", "wait", "--namespace", "kafka", "--for=condition=ready", "pod", "--selector=name=strimzi-cluster-operator", "--timeout=90s"); err != nil {
+		logError("Ingress Controller is not ready: " + err.Error())
+		os.Exit(1)
+	}
+
 	logInfo("Kafka installed successfully!")
-	logInfo("To access Kafka, use the following command:")
-	logInfo(`kubectl port-forward --namespace kafka svc/kafka 9092:9092`)
+	logInfo("To deply a Kafka cluster, run:")
+	logInfo("kubectl apply -f https://strimzi.io/examples/latest/kafka/kraft/kafka-single-node.yaml -n kafka")
+	logInfo("To produce messages, run:")
+	logInfo("kubectl -n kafka run kafka-producer -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 --rm=true --restart=Never -- bin/kafka-console-producer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic")
+	logInfo("To consume messages, run:")
+	logInfo("kubectl -n kafka run kafka-consumer -ti --image=quay.io/strimzi/kafka:0.45.0-kafka-3.9.0 --rm=true --restart=Never -- bin/kafka-console-consumer.sh --bootstrap-server my-cluster-kafka-bootstrap:9092 --topic my-topic --from-beginning")
+	logInfo("To delete the Kafka cluster, run:")
+	logInfo("kubectl delete kafka my-cluster -n kafka")
 }
 
 // TODO: use helm to deploy a release and inform the user about the URL exposed via ingress
@@ -400,7 +403,7 @@ func installAll(cmd *cobra.Command, args []string) {
 }
 
 func main() {
-	var rootCmd = &cobra.Command{Use: "k8s-cli"}
+	var rootCmd = &cobra.Command{Use: "devops-ready-cluster"}
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
 
 	createCmd := &cobra.Command{Use: "create-cluster", Short: "Create Kind Kubernetes cluster", Run: createCluster}
