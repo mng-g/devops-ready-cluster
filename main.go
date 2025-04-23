@@ -397,6 +397,41 @@ func installKafka(cmd *cobra.Command, args []string) {
 	logInfo("kubectl delete kafka my-cluster -n kafka")
 }
 
+func installSchemaRegistry(cmd *cobra.Command, args []string) {
+	logInfo("Installing Schema Registry...")
+
+	// Add the Bitnami Helm repo
+	if err := runCommand("helm", "repo", "add", "bitnami", "https://charts.bitnami.com/bitnami"); err != nil {
+		logError("Error adding Bitnami Helm repo: " + err.Error())
+		os.Exit(1)
+	}
+
+	// Update Helm repos
+	if err := runCommand("helm", "repo", "update"); err != nil {
+		logError("Error updating Helm repos: " + err.Error())
+		os.Exit(1)
+	}
+
+	// Create kafka namespace if it doesn't exist
+	if err := runCommand("kubectl", "create", "namespace", "kafka"); err != nil {
+		logInfo("Namespace 'kafka' may already exist. Continuing...")
+	}
+
+	// Install Schema Registry
+	if err := runCommand(
+		"helm", "install", "my-schema-registry", "bitnami/schema-registry",
+		"--namespace", "kafka",
+		"--set", "kafka.bootstrapServers=my-cluster-kafka-bootstrap.kafka.svc.cluster.local:9092",
+		"--set", "service.type=ClusterIP",
+		"--set", "service.port=8081",
+	); err != nil {
+		logError("Error installing Schema Registry: " + err.Error())
+		os.Exit(1)
+	}
+
+	logInfo("Schema Registry installed successfully!")
+}
+
 // TODO: use helm to deploy a release and inform the user about the URL exposed via ingress
 func installDemoApp(cmd *cobra.Command, args []string) {
 	logInfo("Deploying ArgoCD demo app...")
@@ -431,6 +466,7 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{Use: "install-logging", Short: "Install Logging Stack", Run: installLogging})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-database", Short: "Install CloudNativePG Database", Run: installDatabase})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-kafka", Short: "Install Kafka", Run: installKafka})
+	rootCmd.AddCommand(&cobra.Command{Use: "install-schema-registry", Short: "Install Schema Registry", Run: installSchemaRegistry})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-demo", Short: "Install demo application", Run: installDemoApp})
 
 	if err := rootCmd.Execute(); err != nil {
