@@ -99,6 +99,23 @@ func extractAddressRange(filePath string) (string, error) {
 	return "", scanner.Err()
 }
 
+func getClusters(cmd *cobra.Command, args []string) {
+	logInfo("Getting Kubernetes clusters with Kind...")
+
+	output, err := exec.Command("kind", "get", "clusters").Output()
+	if err != nil {
+		logError("Error listing clusters: " + err.Error())
+		os.Exit(1)
+	}
+
+	clusters := strings.TrimSpace(string(output))
+	if clusters == "" {
+		logInfo("No Kind clusters found.")
+	} else {
+		logInfo("Found clusters:\n" + clusters)
+	}
+}
+
 func createCluster(cmd *cobra.Command, args []string) {
 	name, _ := cmd.Flags().GetString("name")
 	if name == "" {
@@ -406,6 +423,8 @@ func main() {
 	var rootCmd = &cobra.Command{Use: "devops-ready-cluster"}
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
 
+	getCmd := &cobra.Command{Use: "get-clusters", Short: "Get Kind Kubernetes cluster", Run: getClusters}
+
 	createCmd := &cobra.Command{Use: "create-cluster", Short: "Create Kind Kubernetes cluster", Run: createCluster}
 	createCmd.Flags().String("name", "", "Cluster name (required)")
 	createCmd.MarkFlagRequired("name")
@@ -414,7 +433,7 @@ func main() {
 	deleteCmd.Flags().String("name", "", "Cluster name (required)")
 	deleteCmd.MarkFlagRequired("name")
 
-	rootCmd.AddCommand(createCmd, deleteCmd)
+	rootCmd.AddCommand(getCmd, createCmd, deleteCmd)
 	rootCmd.AddCommand(&cobra.Command{Use: "install-metrics", Short: "Install Metrics Server", Run: installMetricsServer})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-ingress", Short: "Install Ingress Controller", Run: installIngress})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-metallb", Short: "Install MetalLB", Run: installMetalLB})
