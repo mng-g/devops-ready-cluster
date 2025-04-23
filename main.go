@@ -407,18 +407,6 @@ func installDemoApp(cmd *cobra.Command, args []string) {
 	logInfo("Demo app deployed successfully!")
 }
 
-func installAll(cmd *cobra.Command, args []string) {
-	installMetricsServer(cmd, args)
-	installIngress(cmd, args)
-	installMetalLB(cmd, args)
-	installCertManager(cmd, args)
-	installArgoCD(cmd, args)
-	installDatabase(cmd, args)
-	installKafka(cmd, args)
-	installMonitoring(cmd, args)
-	installLogging(cmd, args)
-}
-
 func main() {
 	var rootCmd = &cobra.Command{Use: "devops-ready-cluster"}
 	rootCmd.PersistentFlags().BoolVarP(&verbose, "verbose", "v", false, "Enable verbose logging")
@@ -444,7 +432,6 @@ func main() {
 	rootCmd.AddCommand(&cobra.Command{Use: "install-database", Short: "Install CloudNativePG Database", Run: installDatabase})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-kafka", Short: "Install Kafka", Run: installKafka})
 	rootCmd.AddCommand(&cobra.Command{Use: "install-demo", Short: "Install demo application", Run: installDemoApp})
-	rootCmd.AddCommand(&cobra.Command{Use: "install-all", Short: "Install all components", Run: installAll})
 
 	if err := rootCmd.Execute(); err != nil {
 		logError("Error executing command: " + err.Error())
